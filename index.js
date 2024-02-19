@@ -57,24 +57,28 @@ app.post("/register", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Se requiere correo electrónico y contraseña!" });
+      return res.status(400).json({ error: "Se requiere correo electrónico y contraseña." });
+    }
+
+    // Verificar si el correo electrónico tiene un formato válido
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "El correo electrónico proporcionado no es válido." });
     }
 
     const existingUser = await userCollection.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({ error: "El usuario ya existe!" });
+      return res.status(400).json({ error: "El usuario ya existe." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await userCollection.insertOne({ email, password: hashedPassword });
 
-    res.json({ message: "Usuario registrado correctamente!" });
+    res.json({ message: "Usuario registrado correctamente." });
   } catch (error) {
     console.error("Error durante el registro:", error);
-    res.status(500).json({ error: "Error interno en el servidor" });
+    res.status(500).json({ error: "Error interno en el servidor." });
   }
 });
 
@@ -83,30 +87,27 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ error: "Se requiere correo electrónico y contraseña!" });
+      return res.status(400).json({ error: "Se requiere correo electrónico y contraseña." });
     }
 
     const user = await userCollection.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ error: "Usuario no encontrado!" });
+      return res.status(201).json({ error: "Usuario no encontrado." });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(401).json({ error: "Contraseña incorrecta!" });
+      return res.status(202).json({ error: "Credenciales incorrectas." });
     }
 
-    res.json({ message: "Inicio de sesión exitoso!" });
+    res.json({ message: "Inicio de sesión exitoso." });
   } catch (error) {
     console.error("Error durante el inicio de sesión:", error);
-    res.status(500).json({ error: "Error interno en el servidor" });
+    res.status(500).json({ error: "Error interno en el servidor." });
   }
 });
-
 // Manejo de errores centralizado
 app.use((err, req, res, next) => {
   console.error("Error:", err);
