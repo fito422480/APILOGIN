@@ -93,13 +93,13 @@ app.post("/login", async (req, res) => {
     const user = await userCollection.findOne({ email });
 
     if (!user) {
-      return res.status(201).json({ error: "Usuario no encontrado." });
+      return res.status(404).json({ error: "Usuario no encontrado." });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      return res.status(202).json({ error: "Credenciales incorrectas." });
+      return res.status(401).json({ error: "Credenciales incorrectas." });
     }
 
     res.json({ message: "Inicio de sesión exitoso." });
